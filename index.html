@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Us ❤️</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:#000;
+  color:white;
+}
+
+.glass{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(12px);
+  border-radius:20px;
+  padding:20px;
+  margin:20px;
+}
+
+#login{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#app{display:none}
+
+input,button{
+  padding:10px;
+  border:none;
+  border-radius:10px;
+}
+
+button{
+  background:#ff4d6d;
+  color:white;
+}
+
+.flex{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+img,video{
+  width:150px;
+  border-radius:15px;
+}
+
+.scroll{
+  display:flex;
+  overflow-x:auto;
+  gap:10px;
+}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:#111;
+  padding:10px;
+}
+
+.nav button{
+  background:none;
+  color:white;
+}
+
+.section{display:none}
+.active{display:block}
+
+#timer{
+  text-align:center;
+  font-size:26px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="login">
+  <div class="glass">
+    <h2>Enter Code ❤️</h2>
+    <input type="password" id="code">
+    <button onclick="login()">GET IN</button>
+  </div>
+</div>
+
+<div id="app">
+
+<div id="home" class="section active">
+  <div class="glass">
+    <h2 id="timer"></h2>
+  </div>
+</div>
+
+<div id="intro" class="section">
+  <div class="glass">
+    <h2>Introduction</h2>
+
+    <div class="flex">
+      <div contenteditable="true" oninput="saveText('you',this.innerHTML)">Your Details ❤️</div>
+      <input type="file" onchange="saveImage(event,'youImg')">
+      <img id="youImg">
+    </div>
+
+    <div class="flex">
+      <input type="file" onchange="saveImage(event,'herImg')">
+      <img id="herImg">
+      <div contenteditable="true" oninput="saveText('her',this.innerHTML)">Her Details 💕</div>
+    </div>
+
+  </div>
+</div>
+
+<div id="memories" class="section">
+  <div class="glass">
+    <h2>Memories 📸</h2>
+
+    <input type="file" id="memFile">
+    <button onclick="uploadFile('image')">Upload</button>
+
+    <div class="scroll" id="memBox"></div>
+  </div>
+</div>
+
+<div id="videos" class="section">
+  <div class="glass">
+    <h2>Videos 🎥</h2>
+
+    <input type="file" id="vidFile">
+    <button onclick="uploadFile('video')">Upload</button>
+
+    <div id="vidBox"></div>
+  </div>
+</div>
+
+<div id="dates" class="section">
+  <div class="glass">
+    <h2>Special Dates ❤️</h2>
+
+    <input id="dateInput">
+    <button onclick="addDate()">Add</button>
+
+    <ul id="dateList"></ul>
+  </div>
+</div>
+
+<div id="settings" class="section">
+  <div class="glass">
+    <h2>Settings ⚙️</h2>
+
+    <input type="color" onchange="setColor(this.value)">
+    <input type="file" accept="audio/*" onchange="setMusic(event)">
+  </div>
+</div>
+
+<div class="nav">
+  <button onclick="show('home')">🏠</button>
+  <button onclick="show('intro')">👤</button>
+  <button onclick="show('memories')">📸</button>
+  <button onclick="show('videos')">🎥</button>
+  <button onclick="show('dates')">❤️</button>
+  <button onclick="show('settings')">⚙️</button>
+</div>
+
+</div>
+
+<script>
+
+// LOGIN
+function login(){
+  if(code.value==="21062024"){
+    login.style.display="none";
+    app.style.display="block";
+  }
+}
+
+// NAV
+function show(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// TIMER
+let start=new Date("2024-06-21");
+setInterval(()=>{
+  let d=Math.floor((new Date()-start)/(1000*60*60*24));
+  timer.innerText=d+" days together ❤️";
+},1000);
+
+// SAVE TEXT
+function saveText(k,v){localStorage.setItem(k,v)}
+
+// IMAGE SAVE
+function saveImage(e,id){
+  let r=new FileReader();
+  r.onload=()=>{
+    localStorage.setItem(id,r.result);
+    document.getElementById(id).src=r.result;
+  };
+  r.readAsDataURL(e.target.files[0]);
+}
+
+// LOAD
+window.onload=()=>{
+  loadCloud();
+  loadDates();
+}
+
+// ☁️ CLOUD UPLOAD (FINAL)
+async function uploadFile(type){
+
+  let file = type==="image"
+    ? document.getElementById("memFile").files[0]
+    : document.getElementById("vidFile").files[0];
+
+  if(!file){
+    alert("Select file first 😅");
+    return;
+  }
+
+  let fd=new FormData();
+  fd.append("file",file);
+  fd.append("upload_preset","Onelove");
+  fd.append("folder","love_private_2106");
+
+  let url= type==="video"
+    ? "https://api.cloudinary.com/v1_1/dybkwlvze/video/upload"
+    : "https://api.cloudinary.com/v1_1/dybkwlvze/image/upload";
+
+  let res=await fetch(url,{method:"POST",body:fd});
+  let data=await res.json();
+
+  let arr=JSON.parse(localStorage.getItem("cloud")||"[]");
+  arr.push({url:data.secure_url,type,caption:""});
+  localStorage.setItem("cloud",JSON.stringify(arr));
+
+  loadCloud();
+}
+
+// LOAD CLOUD + DELETE + CAPTION
+function loadCloud(){
+  let memBox=document.getElementById("memBox");
+  let vidBox=document.getElementById("vidBox");
+
+  memBox.innerHTML="";
+  vidBox.innerHTML="";
+
+  let arr=JSON.parse(localStorage.getItem("cloud")||"[]");
+
+  arr.forEach((item,index)=>{
+    let div=document.createElement("div");
+
+    if(item.type==="video"){
+      let v=document.createElement("video");
+      v.src=item.url;
+      v.controls=true;
+      div.appendChild(v);
+      vidBox.appendChild(div);
+    } else {
+      let img=document.createElement("img");
+      img.src=item.url;
+      div.appendChild(img);
+      memBox.appendChild(div);
+    }
+
+    let input=document.createElement("input");
+    input.placeholder="Write memory ❤️";
+    input.value=item.caption;
+
+    input.oninput=(e)=>{
+      arr[index].caption=e.target.value;
+      localStorage.setItem("cloud",JSON.stringify(arr));
+    };
+
+    div.appendChild(input);
+
+    let del=document.createElement("button");
+    del.innerText="Delete 🗑️";
+
+    del.onclick=()=>{
+      arr.splice(index,1);
+      localStorage.setItem("cloud",JSON.stringify(arr));
+      loadCloud();
+    };
+
+    div.appendChild(del);
+  });
+}
+
+// DATES
+function addDate(){
+  let val=dateInput.value;
+  let arr=JSON.parse(localStorage.getItem("dates")||"[]");
+  arr.push(val);
+  localStorage.setItem("dates",JSON.stringify(arr));
+  loadDates();
+}
+
+function loadDates(){
+  let ul=document.getElementById("dateList");
+  ul.innerHTML="";
+  let arr=JSON.parse(localStorage.getItem("dates")||"[]");
+  arr.forEach(d=>{
+    let li=document.createElement("li");
+    li.innerText=d;
+    ul.appendChild(li);
+  });
+}
+
+// SETTINGS
+function setColor(c){
+  document.body.style.background=c;
+}
+
+function setMusic(e){
+  let a=document.createElement("audio");
+  a.src=URL.createObjectURL(e.target.files[0]);
+  a.controls=true;
+  a.autoplay=true;
+  document.body.appendChild(a);
+}
+
+</script>
+
+</body>
+</html>
